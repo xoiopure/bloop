@@ -135,15 +135,15 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: "ctags_${{ matrix.name }}"
-          path: "${{ env.TAURI_BIN_PATH }}"
+          path: "${{ env.TAURI_BIN_PATH }}/ctags"
 
       - name: Set permissions (mac/linux)
         if: matrix.name == 'ubuntu-latest' || matrix.name == 'macos-latest'
         run: |
           resdir=${{ env.TAURI_BIN_PATH }}
-          chmod +x $resdir/*
+          chmod +x $resdir/ctags/*
           host=$(rustc -Vv |grep host |cut -d\  -f2)
-          mv $resdir/ctags $resdir/ctags-$host
+          mv $resdir/ctags/* $resdir/ctags-$host
           ls -lR $resdir
 
       - name: Download binaries (windows)
