@@ -143,6 +143,7 @@ jobs:
           resdir=${{ env.TAURI_BIN_PATH }}
           chmod +x $resdir/ctags/*
           host=$(rustc -Vv |grep host |cut -d\  -f2)
+          rm $resdir/ctags-$host
           mkdir $resdir/ctags-$host
           mv $resdir/ctags/* $resdir/ctags-$host
           ls -lR $resdir
