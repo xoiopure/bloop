@@ -3,7 +3,7 @@ name: Tauri Release
 on: workflow_dispatch
 
 env:
-  TAURI_BIN_PATH: apps/desktop/src-tauri/bin/
+  TAURI_BIN_PATH: apps/desktop/src-tauri/bin
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -142,7 +142,7 @@ jobs:
           chmod +x $resdir/*
           host=$(rustc -Vv |grep host |cut -d\  -f2)
           mv $resdir/ctags $resdir/ctags-$host
-          ls -lR $resdir/ctags-$host
+          ls -lR $resdir
 
       - name: Download binaries (windows)
         if: matrix.name == 'windows-latest'
@@ -161,8 +161,8 @@ jobs:
           segment_key: ${{ secrets.VITE_SEGMENT_WRITE_KEY_PROD }}
           sentry_key_fe: ${{ secrets.VITE_SENTRY_DSN_FE }}
           sentry_key_be: ${{ secrets.VITE_SENTRY_DSN_BE }}
-        if: ${{ env.segment_key == '' }} || ${{ env.sentry_key_fe == '' }} || ${{ env.sentry_key_be == '' }}
-        run: exit 1
+        if: ${{ env.segment_key == '' }}
+        run: echo "${{ env.segment_key == '' }}"
 
       - name: Set environment
         run: echo "VITE_SEGMENT_WRITE_KEY_PROD=${{ secrets.VITE_SEGMENT_WRITE_KEY_PROD }}\nVITE_SENTRY_DSN_FE=${{ secrets.VITE_SENTRY_DSN_FE }}\nVITE_SENTRY_DSN_BE=${{ secrets.VITE_SENTRY_DSN_BE }}" >> apps/desktop/.env
