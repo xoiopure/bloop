@@ -139,11 +139,10 @@ jobs:
         if: matrix.name == 'ubuntu-latest' || matrix.name == 'macos-latest'
         run: |
           resdir=${{ env.TAURI_BIN_PATH }}
-          ls -lR $resdir
           chmod +x $resdir/*
           host=$(rustc -Vv |grep host |cut -d\  -f2)
           mv $resdir/ctags $resdir/ctags-$host
-          ls -lR $resdir/
+          ls -lR $resdir/ctags-$host
 
       - name: Download binaries (windows)
         if: matrix.name == 'windows-latest'
