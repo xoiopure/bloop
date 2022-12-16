@@ -143,6 +143,7 @@ jobs:
           chmod +x $resdir/*
           host=$(rustc -Vv |grep host |cut -d\  -f2)
           mv $resdir/ctags $resdir/ctags-$host
+          ls -lR $resdir/
 
       - name: Download binaries (windows)
         if: matrix.name == 'windows-latest'
@@ -177,7 +178,11 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
         with:
-          args: -v -- -v
+          args: -v
+
+      - name: Check permissions
+        if: matrix.name == 'ubuntu-latest' || matrix.name == 'macos-latest'
+        run: ls -lR target/release/bundle
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
