@@ -21,7 +21,9 @@ import NLResults from '../NLResults';
 const SearchPage = () => {
   const { setInputValue, globalRegex, searchType } = useContext(SearchContext);
   const [resultsData, setResultsData] = useState<SearchResponse>();
-  const [nlResultsData, setNLResultsData] = useState<NLSearchResponse>();
+  const [nlResultsData, setNLResultsData] = useState<
+    NLSearchResponse | undefined
+    >();
   const { searchQuery, data, loading } = useSearch<SearchResponse>();
   const {
     searchQuery: nlSearchQuery,
@@ -54,15 +56,19 @@ const SearchPage = () => {
 
   const [renderPage, setRenderPage] = useState<
     'results' | 'repo' | 'full-result' | 'nl-result' | 'no-results'
-  >();
+    >();
 
   useEffect(() => {
     if (searchType === SearchType.REGEX) {
       return;
     }
-    setNLResultsData(nlData);
+    if (!nlData?.selection) {
+      setNLResultsData(undefined);
+    } else {
+      setNLResultsData(nlData);
+    }
     setRenderPage('nl-result');
-  }, [nlData]);
+  }, [nlData, searchType]);
 
   useEffect(() => {
     if (searchType === SearchType.NL) {
@@ -88,7 +94,7 @@ const SearchPage = () => {
       default:
         setRenderPage('results');
     }
-  }, [loading, data]);
+  }, [loading, data, searchType]);
 
   const renderedPage = useMemo(() => {
     switch (renderPage) {
