@@ -23,7 +23,7 @@ const SearchPage = () => {
   const [resultsData, setResultsData] = useState<SearchResponse>();
   const [nlResultsData, setNLResultsData] = useState<
     NLSearchResponse | undefined
-    >();
+  >();
   const { searchQuery, data, loading } = useSearch<SearchResponse>();
   const {
     searchQuery: nlSearchQuery,
@@ -56,7 +56,7 @@ const SearchPage = () => {
 
   const [renderPage, setRenderPage] = useState<
     'results' | 'repo' | 'full-result' | 'nl-result' | 'no-results'
-    >();
+  >();
 
   useEffect(() => {
     if (searchType === SearchType.REGEX) {

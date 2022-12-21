@@ -201,7 +201,8 @@ export interface SuggestionsResponse {
 }
 
 export interface NLSnippet {
-  path: string;
+  repo_name: string;
+  relative_path: string;
   text: string;
 }
 

@@ -14,7 +14,12 @@ interface Status<T> {
 }
 
 interface SearchResponse<T> extends Status<T> {
-  searchQuery: (q: string, page?: number, globalRegex?: boolean) => void;
+  searchQuery: (
+    q: string,
+    page?: number,
+    globalRegex?: boolean,
+    forceSearchType?: SearchType,
+  ) => void;
 }
 
 export const useSearch = <T,>(
@@ -28,7 +33,12 @@ export const useSearch = <T,>(
   const { setLastQueryTime, searchType } = useContext(SearchContext);
   const { trackSearch } = useAnalytics();
 
-  const searchQuery = (query: string, page = 0, globalRegex?: boolean) => {
+  const searchQuery = (
+    query: string,
+    page = 0,
+    globalRegex?: boolean,
+    forceSearchType?: SearchType,
+  ) => {
     if (searchType) {
       setStatus({
         loading: false,
@@ -39,8 +49,10 @@ export const useSearch = <T,>(
     setStatus({ loading: true });
 
     const startTime = Date.now();
+    const currentSearchType =
+      forceSearchType !== undefined ? forceSearchType : searchType;
 
-    switch (searchType) {
+    switch (currentSearchType) {
       case SearchType.NL:
         nlSearchApiCall(query)
           .then((data) => {

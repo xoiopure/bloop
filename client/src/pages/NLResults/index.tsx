@@ -12,7 +12,7 @@ import Filters from '../../components/Filters';
 import { SearchContext } from '../../context/searchContext';
 import { mapFiltersData } from '../../mappers/filter';
 import { mapFileResult, mapRanges, mapResults } from '../../mappers/results';
-import { FullResultModeEnum } from '../../types/general';
+import { FullResultModeEnum, SearchType } from '../../types/general';
 import useAppNavigation from '../../hooks/useAppNavigation';
 import ResultModal from '../ResultModal';
 import { useSearch } from '../../hooks/useSearch';
@@ -45,13 +45,10 @@ const mockQuerySuggestions = [
 const ResultsPage = ({ resultsData, loading }: Props) => {
   const ref = useRef<HTMLDivElement>(null);
   const [isFiltersOpen, setIsFiltersOpen] = useState(true);
-  // const [results, setResults] = useState<ResultType[]>([]);
   const [mode, setMode] = useState<FullResultModeEnum>(
     FullResultModeEnum.SIDEBAR,
   );
   const [openResult, setOpenResult] = useState<FullResult | null>(null);
-  const { filters, setFilters, inputValue, globalRegex } =
-    useContext(SearchContext);
   const { navigateSearch, navigateRepoPath } = useAppNavigation();
   const { searchQuery: fileModalSearchQuery, data: fileResultData } =
     useSearch<FileSearchResponse>();
@@ -62,7 +59,12 @@ const ResultsPage = ({ resultsData, loading }: Props) => {
 
   const onResultClick = useCallback((repo: string, path?: string) => {
     if (path) {
-      fileModalSearchQuery(`open:true repo:${repo} path:${path}`);
+      fileModalSearchQuery(
+        `open:true repo:${repo} path:${path}`,
+        0,
+        false,
+        SearchType.REGEX,
+      );
     } else {
       navigateRepoPath(repo);
     }
@@ -102,8 +104,6 @@ const ResultsPage = ({ resultsData, loading }: Props) => {
     }
   }, [fileResultData]);
 
-  console.log(resultsData);
-
   const renderResults = () => {
     if (loading) {
       return <ResultsPreviewSkeleton />;
@@ -114,11 +114,12 @@ const ResultsPage = ({ resultsData, loading }: Props) => {
     return (
       <SemanticSearch
         snippets={resultsData.snippets.map((item) => ({
-          path: item.path,
+          path: item.relative_path,
           code: item.text,
+          repoName: item.repo_name,
         }))}
         answer={resultsData.selection.answer}
-        onClick={() => onResultClick('', '')}
+        onClick={onResultClick}
       />
     );
   };

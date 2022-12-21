@@ -5,11 +5,12 @@ import { ThumbsDown, ThumbsUp } from '../../../icons';
 import { DeviceContext } from '../../../context/deviceContext';
 import { getUpvote, saveUpvote } from '../../../services/api';
 import useAppNavigation from '../../../hooks/useAppNavigation';
+import { ResultClick } from '../../../types/results';
 
 type Props = {
   answer: string;
-  snippets: { code: string; path: string }[];
-  onClick: () => void;
+  snippets: { code: string; path: string; repoName: string }[];
+  onClick: ResultClick;
 };
 const SemanticSearch = ({ answer, snippets, onClick }: Props) => {
   const { deviceId } = useContext(DeviceContext);
@@ -87,7 +88,7 @@ const SemanticSearch = ({ answer, snippets, onClick }: Props) => {
             language={'JavaScript'}
             filePath={item.path}
             branch={''}
-            repoName={''}
+            repoName={item.repoName}
             repoPath={''}
             hideMatchCounter
             hideDropdown
