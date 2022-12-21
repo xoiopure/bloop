@@ -16,7 +16,11 @@ import { FullResultModeEnum } from '../../types/general';
 import useAppNavigation from '../../hooks/useAppNavigation';
 import ResultModal from '../ResultModal';
 import { useSearch } from '../../hooks/useSearch';
-import { FileSearchResponse, GeneralSearchResponse } from '../../types/api';
+import {
+  FileSearchResponse,
+  GeneralSearchResponse,
+  NLSearchResponse,
+} from '../../types/api';
 import ErrorFallback from '../../components/ErrorFallback';
 import { getHoverables } from '../../services/api';
 import NoResults from '../Results/NoResults';
@@ -26,7 +30,7 @@ import SemanticSearch from '../../components/CodeBlock/SemanticSearch';
 import PageHeader from './PageHeader';
 
 type Props = {
-  resultsData: GeneralSearchResponse;
+  resultsData?: NLSearchResponse;
   loading: boolean;
 };
 
@@ -41,7 +45,7 @@ const mockQuerySuggestions = [
 const ResultsPage = ({ resultsData, loading }: Props) => {
   const ref = useRef<HTMLDivElement>(null);
   const [isFiltersOpen, setIsFiltersOpen] = useState(true);
-  const [results, setResults] = useState<ResultType[]>([]);
+  // const [results, setResults] = useState<ResultType[]>([]);
   const [mode, setMode] = useState<FullResultModeEnum>(
     FullResultModeEnum.SIDEBAR,
   );
@@ -78,10 +82,10 @@ const ResultsPage = ({ resultsData, loading }: Props) => {
     setOpenResult(null);
   }, [mode]);
 
-  useEffect(() => {
-    // setFilters(mapFiltersData(resultsData.stats, filters));
-    // setResults(mapResults(resultsData));
-  }, [resultsData]);
+  // useEffect(() => {
+  //   // setFilters(mapFiltersData(resultsData.stats, filters));
+  //   // setResults(mapResults(resultsData));
+  // }, [resultsData]);
 
   useEffect(() => {
     if (fileResultData) {
@@ -98,6 +102,26 @@ const ResultsPage = ({ resultsData, loading }: Props) => {
     }
   }, [fileResultData]);
 
+  console.log(resultsData);
+
+  const renderResults = () => {
+    if (loading) {
+      return <ResultsPreviewSkeleton />;
+    }
+    if (!resultsData) {
+      return <NoResults suggestions={mockQuerySuggestions} />;
+    }
+    return (
+      <SemanticSearch
+        snippets={resultsData.snippets.map((item) => ({
+          path: item.path,
+          code: item.text,
+        }))}
+        answer={resultsData.selection.answer}
+        onClick={() => onResultClick('', '')}
+      />
+    );
+  };
   return (
     <>
       <Filters isOpen={isFiltersOpen} toggleOpen={toggleFiltersOpen} />
@@ -106,12 +130,20 @@ const ResultsPage = ({ resultsData, loading }: Props) => {
         ref={ref}
       >
         <PageHeader resultsNumber={1} loading={loading} />
-        {/*{results.length || loading ? (*/}
+        {renderResults()}
+        {/*{resultsData || loading ? (*/}
         {/*  loading ? (*/}
         {/*    <ResultsPreviewSkeleton />*/}
         {/*  ) : (*/}
-        <SemanticSearch />
-        {/*)*/}
+        {/*    <SemanticSearch*/}
+        {/*      snippets={resultsData.snippets.map((item) => ({*/}
+        {/*        path: item.path,*/}
+        {/*        code: item.text,*/}
+        {/*      }))}*/}
+        {/*      answer={resultsData.selection.answer}*/}
+        {/*      onClick={() => onResultClick('', '')}*/}
+        {/*    />*/}
+        {/*  )*/}
         {/*) : (*/}
         {/*  <NoResults suggestions={mockQuerySuggestions} />*/}
         {/*)}*/}

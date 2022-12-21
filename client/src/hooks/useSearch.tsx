@@ -1,6 +1,10 @@
 import { useContext, useEffect, useState } from 'react';
-import { search as searchApiCall } from '../services/api';
+import {
+  search as searchApiCall,
+  nlSearch as nlSearchApiCall,
+} from '../services/api';
 import { SearchContext } from '../context/searchContext';
+import { SearchType } from '../types/general';
 import useAnalytics from './useAnalytics';
 
 interface Status<T> {
@@ -36,16 +40,31 @@ export const useSearch = <T,>(
 
     const startTime = Date.now();
 
-    searchApiCall(query, page, undefined, globalRegex)
-      .then((res: any) => {
-        const queryTime = Date.now() - startTime;
-        setLastQueryTime(queryTime);
-        trackSearch(queryTime);
-        setStatus({ loading: false, data: res });
-      })
-      .catch((error: Error) => {
-        setStatus({ loading: false, error });
-      });
+    switch (searchType) {
+      case SearchType.NL:
+        nlSearchApiCall(query)
+          .then((data) => {
+            const queryTime = Date.now() - startTime;
+            setLastQueryTime(queryTime);
+            trackSearch(queryTime);
+            setStatus({ loading: false, data: data as any });
+          })
+          .catch((error: Error) => {
+            setStatus({ loading: false, error });
+          });
+        break;
+      case SearchType.REGEX:
+        searchApiCall(query, page, undefined, globalRegex)
+          .then((res: any) => {
+            const queryTime = Date.now() - startTime;
+            setLastQueryTime(queryTime);
+            trackSearch(queryTime);
+            setStatus({ loading: false, data: res });
+          })
+          .catch((error: Error) => {
+            setStatus({ loading: false, error });
+          });
+    }
   };
 
   useEffect(() => {
