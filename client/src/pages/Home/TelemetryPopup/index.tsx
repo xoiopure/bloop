@@ -55,7 +55,12 @@ const TelemetryPopup = ({ onClose, visible }: Props) => {
             </p>
             <p className="caption text-gray-500">
               Further details can be found within out{' '}
-              <a className="underline" href="">
+              <a
+                className="underline"
+                href="https://bloop.ai/privacy"
+                target="_blank"
+                rel="noreferrer noopener"
+              >
                 privacy policy
               </a>
               .

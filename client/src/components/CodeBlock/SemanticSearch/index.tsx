@@ -78,7 +78,7 @@ const SemanticSearch = ({ answer, snippets, onClick }: Props) => {
           dangerouslySetInnerHTML={{ __html: highlightedAnswer }}
         ></span>
         {!isUpvoteLoading && (
-          <div className="flex flex-row absolute top-3 right-3">
+          <div className="flex flex-row absolute top-2 right-3">
             <Button
               onlyIcon
               title="Upvote"
