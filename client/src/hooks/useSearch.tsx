@@ -45,6 +45,7 @@ export const useSearch = <T,>(
         // @ts-ignore
         data: { data: [], metadata: {}, stats: {} },
       });
+      return;
     }
     setStatus({ loading: true });
 
