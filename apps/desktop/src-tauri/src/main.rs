@@ -3,6 +3,8 @@
     windows_subsystem = "windows"
 )]
 
+mod qdrant;
+
 use std::path::PathBuf;
 
 use bleep::{Application, Configuration, Environment};
@@ -48,6 +50,19 @@ async fn main() {
             let mut configuration = Configuration::read(config).unwrap();
             configuration.ctags_path = relative_command_path("ctags");
             configuration.max_threads = bleep::default_parallelism() / 4;
+            configuration.model_dir = app
+                .path_resolver()
+                .resolve_resource("model")
+                .expect("bad bundle");
+
+            let cache_dir = app.path_resolver().app_cache_dir().unwrap();
+            configuration
+                .source
+                .set_default_dir(&cache_dir.join("bleep"));
+
+            tokio::task::block_in_place(move || {
+                tokio::runtime::Handle::current().block_on(qdrant::start(cache_dir))
+            });
 
             let app = app.handle();
             tokio::spawn(async move {

@@ -15,6 +15,7 @@ mod api {
 
     #[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
     pub struct Snippet {
+        pub lang: String,
         pub repo_name: String,
         pub relative_path: String,
         pub text: String,
@@ -65,6 +66,7 @@ pub async fn handle(
             }
 
             api::Snippet {
+                lang: value_to_string(s.remove("lang").unwrap()),
                 repo_name: value_to_string(s.remove("repo_name").unwrap()),
                 relative_path: value_to_string(s.remove("relative_path").unwrap()),
                 text: value_to_string(s.remove("snippet").unwrap()),
@@ -73,7 +75,7 @@ pub async fn handle(
         .collect::<Vec<_>>();
 
     let res = reqwest::Client::new()
-        .post(format!("http://{}/q", app.config.answer_api_host))
+        .post(format!("{}/q", app.config.answer_api_base))
         .json(&api::Request {
             query: params.q,
             snippets: snippets.clone(),
@@ -92,7 +94,7 @@ pub async fn handle(
         selection: res.json().await.map_err(|e| {
             super::error(
                 ErrorKind::Internal,
-                format!("got bad answer API response: {}", e),
+                format!("answer API was not able to create a valid result: {}", e),
             )
         })?,
     })))
