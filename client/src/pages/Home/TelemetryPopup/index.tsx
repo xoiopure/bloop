@@ -65,8 +65,8 @@ const TelemetryPopup = ({ onClose, visible }: Props) => {
             <Button
               variant="primary"
               onClick={() => {
-                // savePlainToStorage(IS_ANALYTICS_ALLOWED_KEY, 'true');
-                // setIsAnalyticsAllowed(true);
+                savePlainToStorage(IS_ANALYTICS_ALLOWED_KEY, 'true');
+                setIsAnalyticsAllowed(true);
                 onClose();
               }}
             >
