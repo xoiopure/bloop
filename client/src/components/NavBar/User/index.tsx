@@ -1,13 +1,23 @@
-import { useCallback, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Bug, ChevronDownFilled, Cog, Person } from '../../../icons';
+import { useCallback, useContext, useMemo } from 'react';
+import {
+  ArrowLeft,
+  Bug,
+  ChevronDownFilled,
+  Cog,
+  Person,
+  PlusSignInBubble,
+  Tab,
+} from '../../../icons';
 import DropdownWithIcon from '../../Dropdown/WithIcon';
+import Dropdown from '../../Dropdown/Normal';
 import ShareButton, { ShareFile } from '../../ShareButton';
 import { MenuListItemType } from '../../ContextMenu';
 import SearchInput from '../../SearchInput';
 import { UIContext } from '../../../context/uiContext';
 import Button from '../../Button';
 import useAppNavigation from '../../../hooks/useAppNavigation';
+import { TabsContext } from '../../../context/tabsContext';
+import { ExtendedMenuItemType, MenuItemType } from '../../../types/general';
 
 type Props = {
   shareFiles?: ShareFile[];
@@ -17,10 +27,40 @@ type Props = {
 const NavBarUser = ({ shareFiles, isSkeleton }: Props) => {
   const { setSettingsOpen, setBugReportModalOpen } = useContext(UIContext);
   const { navigateBack } = useAppNavigation();
+  const { tabs, setActiveTab, handleAddTab, activeTab } =
+    useContext(TabsContext);
 
   const backButtonHandler = useCallback(() => {
     navigateBack();
   }, []);
+
+  const tabItems = useMemo(
+    () =>
+      tabs
+        .map((t) => ({
+          text: 'Untitled search ' + t.key,
+          type: MenuListItemType.DEFAULT as MenuItemType | ExtendedMenuItemType,
+          onClick: () => setActiveTab(t.key),
+          icon: <Tab />,
+        }))
+        .concat([
+          {
+            type: MenuListItemType.DIVIDER,
+            text: '',
+            onClick: () => {},
+            icon: <Tab />,
+          },
+          {
+            type: MenuListItemType.DEFAULT,
+            text: 'Add tab',
+            icon: <PlusSignInBubble />,
+            onClick: () => {
+              handleAddTab({ key: tabs.length });
+            },
+          },
+        ]),
+    [tabs, activeTab, setActiveTab, handleAddTab],
+  );
 
   return (
     <div className="flex flex-row flex-1">
@@ -32,6 +72,11 @@ const NavBarUser = ({ shareFiles, isSkeleton }: Props) => {
       >
         <ArrowLeft />
       </Button>
+      <Dropdown
+        items={tabItems}
+        selected={tabItems[activeTab]}
+        hint="Open tabs"
+      />
       <div className="flex items-center justify-between	w-full">
         <span />
         {/*{isSkeleton ? (*/}

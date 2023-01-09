@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChevronDownFilled, ChevronUpFilled } from '../../../icons';
 import TextField from '../../TextField';
 import ContextMenu, { ContextMenuItem } from '../../ContextMenu';
@@ -14,6 +14,10 @@ type Props = {
 const Dropdown = ({ items, hint, selected, btnHint }: Props) => {
   const [visible, setVisibility] = useState(false);
   const [selectedItem, setSelectedItem] = useState(selected);
+
+  useEffect(() => {
+    setSelectedItem(selected);
+  }, [selected]);
 
   const handleSelect = (item: ContextMenuItem) => {
     setSelectedItem(item);

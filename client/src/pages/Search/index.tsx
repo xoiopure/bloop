@@ -10,6 +10,7 @@ import useAppNavigation from '../../hooks/useAppNavigation';
 import { buildRepoQuery } from '../../utils';
 import ResultsPage from '../Results';
 import ViewResult from '../ResultFull';
+import HomePage from '../Home';
 
 const SearchPage = () => {
   const { setInputValue, globalRegex } = useContext(SearchContext);
@@ -18,8 +19,13 @@ const SearchPage = () => {
 
   const { navigatedItem, query } = useAppNavigation();
 
+  const [renderPage, setRenderPage] = useState<
+    'results' | 'repo' | 'full-result' | 'home'
+  >();
+
   useEffect(() => {
-    if (!navigatedItem) {
+    if (!navigatedItem || navigatedItem.type === 'home') {
+      setRenderPage('home');
       return;
     }
 
@@ -34,11 +40,11 @@ const SearchPage = () => {
     }
   }, [navigatedItem]);
 
-  const [renderPage, setRenderPage] = useState<
-    'results' | 'repo' | 'full-result'
-  >();
-
   useEffect(() => {
+    if (!navigatedItem || navigatedItem.type === 'home') {
+      setRenderPage('home');
+      return;
+    }
     if (!data?.data?.[0] || loading) {
       return;
     }
@@ -64,6 +70,8 @@ const SearchPage = () => {
         return <RepositoryPage repositoryData={resultsData} />;
       case 'full-result':
         return <ViewResult data={resultsData} />;
+      default:
+        return <HomePage />;
     }
   }, [renderPage, resultsData, loading]);
 
