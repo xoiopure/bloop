@@ -7,7 +7,7 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "ai.bloop.bloop",
+    "productName": "ai.bloop",
     "version": "0.3.1"
   },
   "tauri": {
@@ -55,7 +55,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "ai.bloop.bloop",
+      "identifier": "ai.bloop",
       "longDescription": "Helping developers find code faster",
       "macOS": {
         "entitlements": null,
@@ -65,8 +65,8 @@
         "signingIdentity": null
       },
       "resources": [
-        "config.json",
-        "model/*"
+        "model/*",
+        "config/config.json"
       ],
       "shortDescription": "",
       "targets": "all",

@@ -17,7 +17,7 @@ where
 {
     let config = app
         .path_resolver()
-        .resolve_resource("config.json")
+        .resolve_resource("config/config.json")
         .expect("failed to resolve resource");
 
     let mut configuration = Configuration::merge(

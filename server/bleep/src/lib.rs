@@ -16,12 +16,14 @@ use criterion as _;
 #[cfg(any(bench, test))]
 use git_version as _;
 
+use dunce as _;
+
 #[cfg(all(feature = "debug", not(tokio_unstable)))]
 use console_subscriber as _;
 
-#[cfg(target_os = "windows")]
+#[cfg(windows)]
 use dunce::canonicalize;
-#[cfg(not(target_os = "windows"))]
+#[cfg(not(windows))]
 use std::fs::canonicalize;
 
 use crate::{

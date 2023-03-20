@@ -89,16 +89,22 @@ fn run_command(command: &Path, qdrant_dir: &Path) -> Child {
     }
 
     // nix::sys::resource::setrlimit().unwrap();
-    Command::new(command)
-        .current_dir(qdrant_dir)
+    let mut child = Command::new(command)
+        .current_dir(qdrant_dir);
+
+    child
         .spawn()
         .expect("failed to start qdrant")
 }
 
 #[cfg(windows)]
 fn run_command(command: &Path, qdrant_dir: &Path) -> Child {
+    use std::os::windows::process::CommandExt;
+
     Command::new(command)
         .current_dir(qdrant_dir)
+        // Add a CREATE_NO_WINDOW flag to prevent qdrant console popup
+        .creation_flags(0x08000000)
         .spawn()
         .expect("failed to start qdrant")
 }
