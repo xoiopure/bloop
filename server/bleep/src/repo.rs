@@ -353,7 +353,7 @@ async fn get_repo_metadata(repo_disk_path: &PathBuf) -> Arc<RepoMetadata> {
     RepoMetadata {
         last_commit_unix_secs: repo,
         symbols: ctags::get_symbols(repo_disk_path, exclude_langs).await,
-        langs: language::aggregate(repo_disk_path),
+        langs: language::aggregate(iterator::FileWalker::index_directory(repo_disk_path)),
     }
     .into()
 }
