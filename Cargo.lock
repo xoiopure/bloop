@@ -3240,7 +3240,7 @@ dependencies = [
 [[package]]
 name = "hyperpolyglot"
 version = "0.1.7"
-source = "git+https://github.com/bloopai/hyperpolyglot?branch=remove-pcre#bf293cb22603c0a11b40f5377608cf67cf73d842"
+source = "git+https://github.com/bloopai/hyperpolyglot#3043fc311a6ea0556826bfed34cc67980336cc80"
 dependencies = [
  "clap 2.34.0",
  "ignore",
@@ -4855,7 +4855,7 @@ dependencies = [
 [[package]]
 name = "polyglot_tokenizer"
 version = "0.2.1"
-source = "git+https://github.com/bloopai/hyperpolyglot?branch=remove-pcre#bf293cb22603c0a11b40f5377608cf67cf73d842"
+source = "git+https://github.com/bloopai/hyperpolyglot#3043fc311a6ea0556826bfed34cc67980336cc80"
 dependencies = [
  "circular-queue",
 ]
