@@ -12,7 +12,7 @@ use qdrant_client::{
     qdrant::{
         r#match::MatchValue, vectors_config, with_payload_selector, with_vectors_selector,
         CollectionOperationResponse, CreateCollection, Distance, FieldCondition, Filter, Match,
-        PointId, PointStruct, ScoredPoint, SearchPoints, VectorParams, VectorsConfig,
+        PointId, PointStruct, ScoredPoint, SearchPoints, Value, VectorParams, VectorsConfig,
         WithPayloadSelector, WithVectorsSelector,
     },
 };
@@ -222,6 +222,7 @@ impl Semantic {
         relative_path: &str,
         buffer: &str,
         lang_str: &str,
+        branches: &[String],
     ) {
         // Delete all points corresponding to the same path
         self.delete_points_by_path(repo_ref, std::iter::once(relative_path))
@@ -252,6 +253,7 @@ impl Semantic {
                             ("lang".into(), lang_str.to_ascii_lowercase().into()),
                             ("repo_name".into(), repo_name.into()),
                             ("repo_ref".into(), repo_ref.into()),
+                            ("branches".into(), Value::from(branches.to_owned())),
                             ("relative_path".into(), relative_path.into()),
                             ("snippet".into(), chunk.data.into()),
                             (

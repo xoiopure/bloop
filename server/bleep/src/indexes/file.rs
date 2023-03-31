@@ -605,6 +605,7 @@ impl File {
                         &relative_path_str,
                         &file.buffer,
                         lang_str,
+                        &file.branches,
                     ))
                 });
             }
