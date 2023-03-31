@@ -1,3 +1,4 @@
+use anyhow::Context;
 use serde::{de::Error, Deserialize, Deserializer, Serialize, Serializer};
 use std::{
     fmt::{self, Display},
@@ -250,7 +251,7 @@ impl Repository {
         writers: &indexes::GlobalWriteHandle<'_>,
     ) -> Result<Arc<RepoMetadata>, RepoError> {
         use rayon::prelude::*;
-        let metadata = get_repo_metadata(&self.disk_path).await;
+        let metadata = self.get_repo_metadata().await;
 
         tokio::task::block_in_place(|| {
             writers
@@ -260,6 +261,22 @@ impl Repository {
         })?;
 
         Ok(metadata)
+    }
+
+    /// Pre-scan the repository to provide supporting metadata for a
+    /// new indexing operation
+    async fn get_repo_metadata(&self) -> Arc<RepoMetadata> {
+        let last_commit_unix_secs = gix::open(&self.disk_path)
+            .context("failed to open git repo")
+            .and_then(|repo| Ok(repo.head()?.peel_to_commit_in_place()?.time()?.seconds()))
+            .unwrap_or(0) as u64;
+
+        RepoMetadata {
+            last_commit_unix_secs,
+            symbols: ctags::get_symbols(&self.disk_path).await,
+            langs: language::aggregate(iterator::FileWalker::index_directory(&self.disk_path)),
+        }
+        .into()
     }
 
     /// Marks the repository for removal on the next sync
@@ -319,43 +336,6 @@ pub struct RepoMetadata {
     pub last_commit_unix_secs: u64,
     pub symbols: ctags::SymbolMap,
     pub langs: language::LanguageInfo,
-}
-
-async fn get_repo_metadata(repo_disk_path: &PathBuf) -> Arc<RepoMetadata> {
-    let repo = git2::Repository::open(repo_disk_path)
-        .and_then(|repo| Ok(repo.head()?.peel_to_commit()?.time().seconds() as u64))
-        .unwrap_or(0);
-
-    // Extract symbols using Ctags for all languages which are not covered by a more
-    // precise form of symbol extraction.
-    //
-    // There might be a way to generate this list from intelligence::ALL_LANGUAGES,
-    // but not all lang_ids are valid ctags' languages though, so we hardcode some here:
-    let exclude_langs = &[
-        "javascript",
-        "typescript",
-        "python",
-        "go",
-        "c",
-        "rust",
-        "c++",
-        "c#",
-        "java",
-        // misc languages
-        "json",
-        "markdown",
-        "rmarkdown",
-        "iniconf",
-        "man",
-        "protobuf",
-    ];
-
-    RepoMetadata {
-        last_commit_unix_secs: repo,
-        symbols: ctags::get_symbols(repo_disk_path, exclude_langs).await,
-        langs: language::aggregate(iterator::FileWalker::index_directory(repo_disk_path)),
-    }
-    .into()
 }
 
 #[derive(Serialize, Deserialize, ToSchema, PartialEq, Eq, Clone, Debug)]

@@ -24,6 +24,30 @@ use tracing::{debug, warn};
 pub static CTAGS_BINARY: OnceCell<PathBuf> = OnceCell::new();
 pub type SymbolMap = HashMap<PathBuf, Vec<Symbol>>;
 
+// Extract symbols using Ctags for all languages which are not covered by a more
+// precise form of symbol extraction.
+//
+// There might be a way to generate this list from intelligence::ALL_LANGUAGES,
+// but not all lang_ids are valid ctags' languages though, so we hardcode some here:
+const EXCLUDE_LANGS: &[&'static str] = &[
+    "javascript",
+    "typescript",
+    "python",
+    "go",
+    "c",
+    "rust",
+    "c++",
+    "c#",
+    "java",
+    // misc languages
+    "json",
+    "markdown",
+    "rmarkdown",
+    "iniconf",
+    "man",
+    "protobuf",
+];
+
 #[derive(Debug, Deserialize)]
 struct RawSymbol {
     #[allow(unused)]
@@ -114,7 +138,7 @@ async fn call_ctags(paths: Vec<String>, exclude_langs_list: &[&str]) -> Result<S
     Ok(String::from_utf8(output.stdout)?)
 }
 
-pub async fn get_symbols(repo_disk_path: &Path, exclude_langs: &[&str]) -> SymbolMap {
+pub async fn get_symbols(repo_disk_path: &Path) -> SymbolMap {
     let paths = find_files(repo_disk_path);
 
     let threads = std::thread::available_parallelism()
@@ -127,7 +151,7 @@ pub async fn get_symbols(repo_disk_path: &Path, exclude_langs: &[&str]) -> Symbo
     }
 
     let outputs = stream::iter(files)
-        .filter_map(|paths| async move { call_ctags(paths, exclude_langs).await.ok() })
+        .filter_map(|paths| async move { call_ctags(paths, EXCLUDE_LANGS).await.ok() })
         .collect::<Vec<String>>()
         .await;
 
@@ -218,13 +242,12 @@ mod tests {
     #[tokio::test]
     async fn run_ctags() {
         let path = crate::canonicalize(Path::new(".")).unwrap();
-        let symbols = get_symbols(&path, &[]).await;
+        let symbols = get_symbols(&path).await;
         assert!(!symbols.is_empty());
     }
 
     #[tokio::test]
     async fn exclude_js_files() {
-        let exclude_langs = &["javascript", "typescript", "python", "go", "c", "rust"];
         let dir = TempDir::new("parse-ctags").unwrap();
         let dir_path = crate::canonicalize(dir.path()).unwrap();
 
@@ -245,15 +268,15 @@ mod tests {
         std::fs::write(&hs_file_path, hs_file_content).unwrap();
 
         // js files should be excluded
-        let symbols = get_symbols(&js_file_path, exclude_langs).await;
+        let symbols = get_symbols(&js_file_path).await;
         assert!(symbols.is_empty());
 
         // go files should be excluded
-        let symbols = get_symbols(&go_file_path, exclude_langs).await;
+        let symbols = get_symbols(&go_file_path).await;
         assert!(symbols.is_empty());
 
         // haskell files should be included
-        let symbols = get_symbols(&hs_file_path, exclude_langs).await;
+        let symbols = get_symbols(&hs_file_path).await;
         assert_eq!(symbols.values().flatten().count(), 2);
     }
 
