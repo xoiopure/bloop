@@ -29,7 +29,7 @@ pub type SymbolMap = HashMap<PathBuf, Vec<Symbol>>;
 //
 // There might be a way to generate this list from intelligence::ALL_LANGUAGES,
 // but not all lang_ids are valid ctags' languages though, so we hardcode some here:
-const EXCLUDE_LANGS: &[&'static str] = &[
+const EXCLUDE_LANGS: &[&str] = &[
     "javascript",
     "typescript",
     "python",
