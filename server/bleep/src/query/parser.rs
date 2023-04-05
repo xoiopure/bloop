@@ -13,6 +13,7 @@ pub struct Query<'a> {
     pub repo: Option<Literal<'a>>,
     pub path: Option<Literal<'a>>,
     pub lang: Option<Cow<'a, str>>,
+    pub branch: Option<Literal<'a>>,
     pub target: Option<Target<'a>>,
 }
 
@@ -27,6 +28,7 @@ pub struct NLQuery<'a> {
     pub repo: Option<Literal<'a>>,
     pub lang: Option<Cow<'a, str>>,
     pub target: Option<Literal<'a>>,
+    pub branch: Option<Literal<'a>>,
 }
 
 impl<'a> NLQuery<'a> {
@@ -40,6 +42,10 @@ impl<'a> NLQuery<'a> {
 
     pub fn target(&self) -> Option<&Cow<'_, str>> {
         self.target.as_ref().and_then(|t| t.as_plain())
+    }
+
+    pub fn branch(&self) -> Option<&Cow<'_, str>> {
+        self.branch.as_ref().and_then(|t| t.as_plain())
     }
 }
 
@@ -56,6 +62,7 @@ impl<'a> Query<'a> {
             repo: rhs.repo.or(self.repo),
             path: rhs.path.or(self.path),
             lang: rhs.lang.or(self.lang),
+            branch: rhs.branch.or(self.branch),
 
             target: match (self.target, rhs.target) {
                 (Some(Target::Content(lhs)), Some(Target::Content(rhs))) => {
@@ -285,6 +292,7 @@ enum Expr<'a> {
     Path(Literal<'a>),
     Lang(Cow<'a, str>),
     Content(Literal<'a>),
+    Branch(Literal<'a>),
 
     CaseSensitive(bool),
     Open(bool),
@@ -306,6 +314,7 @@ impl<'a> Expr<'a> {
             Rule::repo => Repo(Literal::from(pair.into_inner().next().unwrap())),
             Rule::symbol => Symbol(Literal::from(pair.into_inner().next().unwrap())),
             Rule::org => Org(Literal::from(pair.into_inner().next().unwrap())),
+            Rule::branch => Branch(Literal::from(pair.into_inner().next().unwrap())),
             Rule::lang => Lang(pair.into_inner().as_str().into()),
 
             Rule::open => {
@@ -406,11 +415,13 @@ pub fn parse_nl(query: &str) -> Result<NLQuery<'_>, ParseError> {
     let pairs = PestParser::parse(Rule::nl_query, query).map_err(Box::new)?;
 
     let mut repo = None;
+    let mut branch = None;
     let mut lang = None;
     let mut target: Option<Literal> = None;
     for pair in pairs {
         match pair.as_rule() {
             Rule::repo => repo = Some(Literal::from(pair.into_inner().next().unwrap())),
+            Rule::branch => branch = Some(Literal::from(pair.into_inner().next().unwrap())),
             Rule::lang => {
                 lang = Some(super::languages::parse_alias(
                     pair.into_inner().as_str().into(),
@@ -428,7 +439,12 @@ pub fn parse_nl(query: &str) -> Result<NLQuery<'_>, ParseError> {
         }
     }
 
-    let qs = NLQuery { repo, lang, target };
+    let qs = NLQuery {
+        repo,
+        lang,
+        branch,
+        target,
+    };
 
     Ok(qs)
 }
@@ -437,6 +453,10 @@ fn flatten(root: Expr<'_>) -> SmallVec<[Query<'_>; 1]> {
     match root {
         Expr::Repo(repo) => smallvec![Query {
             repo: Some(repo),
+            ..Default::default()
+        }],
+        Expr::Branch(branch) => smallvec![Query {
+            branch: Some(branch),
             ..Default::default()
         }],
         Expr::Org(org) => smallvec![Query {
@@ -500,6 +520,17 @@ mod tests {
         assert_eq!(
             parse("ParseError").unwrap(),
             vec![Query {
+                target: Some(Target::Content(Literal::Plain("ParseError".into()))),
+                ..Query::default()
+            }],
+        );
+
+        assert_eq!(
+            parse("org:bloopai repo:enterprise-search branch:main ParseError").unwrap(),
+            vec![Query {
+                repo: Some(Literal::Plain("enterprise-search".into())),
+                org: Some(Literal::Plain("bloopai".into())),
+                branch: Some(Literal::Plain("main".into())),
                 target: Some(Target::Content(Literal::Plain("ParseError".into()))),
                 ..Query::default()
             }],
@@ -958,6 +989,7 @@ mod tests {
                 target: Some(Literal::Plain("what is background color?".into())),
                 lang: Some("tsx".into()),
                 repo: Some(Literal::Plain("bloop".into())),
+                branch: None
             },
         );
     }
@@ -973,6 +1005,7 @@ mod tests {
                 target: Some(Literal::Plain("what is background color?".into())),
                 lang: Some("tsx".into()),
                 repo: Some(Literal::Plain("bloop".into())),
+                branch: None
             },
         );
 
@@ -984,6 +1017,7 @@ mod tests {
                 )),
                 lang: None,
                 repo: None,
+                branch: None
             },
         );
     }
