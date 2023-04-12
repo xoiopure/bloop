@@ -31,7 +31,7 @@ use crate::{
 use super::prelude::*;
 
 /// Mirrored from `answer_api/lib.rs` to avoid private dependency.
-pub mod api {
+mod api {
     use serde::Deserialize;
 
     #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]

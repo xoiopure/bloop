@@ -11,9 +11,9 @@ pub(super) struct Args {
     query: String,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, serde::Deserialize, Debug)]
 pub(super) struct SemanticResponse {
-    chunks: Vec<serde_json::Value>,
+    pub chunks: Vec<serde_json::Value>,
 }
 
 impl super::ApiResponse for SemanticResponse {}

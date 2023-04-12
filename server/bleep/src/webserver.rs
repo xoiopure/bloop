@@ -13,6 +13,7 @@ use utoipa::ToSchema;
 
 mod aaa;
 pub mod answer;
+pub mod answer2;
 mod autocomplete;
 mod config;
 mod file;
@@ -68,8 +69,12 @@ pub async fn start(app: Application) -> anyhow::Result<()> {
         .route("/file/*ref", get(file::handle))
         .route("/semantic/chunks", get(semantic::raw_chunks))
         .route(
-            "/answer",
+            "/answer_old",
             get(answer::handle).with_state(Arc::new(answer::AnswerState::default())),
+        )
+        .route(
+            "/answer",
+            answer2::endpoint(),
         );
 
     if app.env.allow(Feature::GithubDeviceFlow) {

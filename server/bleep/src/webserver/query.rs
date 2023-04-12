@@ -158,7 +158,7 @@ pub(super) async fn handle(
     Arc::new(api_params).query(indexes).await.map(json)
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct QueryResponse {
     /// Number of search results in this response
     count: usize,
@@ -173,7 +173,7 @@ pub struct QueryResponse {
 impl super::ApiResponse for QueryResponse {}
 
 /// Metadata pertaining to the query response, such as paging info
-#[derive(Default, Serialize, ToSchema)]
+#[derive(Default, Serialize, Deserialize, ToSchema)]
 pub(super) struct PagingMetadata {
     /// Page number passed in the request
     page: usize,
@@ -233,7 +233,7 @@ impl ResultStats {
     }
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 #[non_exhaustive]
 #[serde(tag = "kind", content = "data")]
 pub enum QueryResult {
@@ -260,31 +260,31 @@ pub enum QueryResult {
     Lang(String),
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct RepositoryResultData {
     name: HighlightedString,
     repo_ref: String,
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct FileResultData {
     repo_name: String,
-    relative_path: HighlightedString,
+    pub relative_path: HighlightedString,
     repo_ref: String,
     lang: Option<String>,
 }
 
-#[derive(Serialize, ToSchema, Debug)]
+#[derive(Serialize, Deserialize, ToSchema, Debug)]
 pub struct FileData {
     repo_name: String,
     relative_path: String,
     repo_ref: String,
     lang: Option<String>,
-    contents: String,
+    pub contents: String,
     siblings: Vec<DirEntry>,
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct DirectoryData {
     repo_name: String,
     relative_path: String,
@@ -292,13 +292,13 @@ pub struct DirectoryData {
     entries: Vec<DirEntry>,
 }
 
-#[derive(Serialize, ToSchema, PartialEq, Eq, Hash, Clone, Debug)]
+#[derive(Serialize, Deserialize, ToSchema, PartialEq, Eq, Hash, Clone, Debug)]
 pub struct DirEntry {
     name: String,
     entry_data: EntryData,
 }
 
-#[derive(Serialize, ToSchema, PartialEq, Eq, Hash, Clone, Debug)]
+#[derive(Serialize, Deserialize, ToSchema, PartialEq, Eq, Hash, Clone, Debug)]
 enum EntryData {
     Directory,
     File { lang: Option<String> },
